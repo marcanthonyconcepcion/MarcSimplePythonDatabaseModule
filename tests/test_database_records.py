@@ -1,3 +1,10 @@
+__author__ = "Marc Concepcion"
+__copyright__ = "Copyright 2021, Marc Concepcion"
+__credits__ = ["Marc Concepcion"]
+__maintainer__ = "Marc Concepcion"
+__email__ = "marcanthonyconcepcion@gmail.com"
+__status__ = "Demo"
+
 import unittest
 from decimal import Decimal
 
@@ -25,7 +32,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(database_records.HOST, self.expected_configuration['database']['host'])
         self.assertEqual(database_records.DBNAME, self.expected_configuration['database']['dbname'])
         self.assertEqual(database_records.USER, self.expected_configuration['database']['user'])
-        self.assertEqual(database_records.USER, self.expected_configuration['database']['password'])
+        self.assertEqual(database_records.PASSWORD, self.expected_configuration['database']['password'])
 
     def test_connection(self):
         self.assertEqual(1, next(self.dut.fetch('select %(number)s', {'number': 1}))[0])
