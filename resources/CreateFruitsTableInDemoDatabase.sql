@@ -1,3 +1,9 @@
+/*
+Author: Marc Concepcion
+Copyright 2021, Marc Concepcion
+*/
+
+
 drop database if exists `demo_database`;
 create database if not exists `demo_database`;
 show databases;
