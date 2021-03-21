@@ -21,18 +21,32 @@ PASSWORD: Final = configuration['database']['password']
 class DatabaseRecords:
 
     def __init__(self):
-        self.database = mysql.connector.connect(host=HOST, database=DBNAME,
-                                                user=USER, password=PASSWORD)
-        self.cursor = self.database.cursor()
+        try:
+            self.database = mysql.connector.connect(host=HOST, database=DBNAME,
+                                                    user=USER, password=PASSWORD)
+            self.cursor = self.database.cursor()
+        except mysql.connector.errors.Error as database_error:
+            raise DatabaseError('Database error. {details}'.format(details=database_error))
 
     def disconnect(self):
         self.database.disconnect()
+
+    def test_connection(self):
+        return self.database.is_connected()
+
+    def reconnect(self):
+        try:
+            self.database.reconnect()
+        except mysql.connector.errors.Error as database_error:
+            raise DatabaseError('Database error. {details}'.format(details=database_error))
 
     def fetch(self, query, parameters=None):
         try:
             self.cursor.execute(operation=query, params=parameters)
             for result in self.cursor:
                 yield result
+        except mysql.connector.errors.Error as database_error:
+            raise DatabaseError('Database error. {details}'.format(details=database_error))
         finally:
             self.cursor.reset()
 
@@ -40,19 +54,17 @@ class DatabaseRecords:
         try:
             self.cursor.execute(operation=query, params=parameters)
             self.database.commit()
-        except Exception as exception:
+        except mysql.connector.errors.Error as database_error:
             self.database.rollback()
-            raise DatabaseTransactionError(
-                'ERROR updating records to the database. Rolled back changes. {details}'.format(details=exception))
+            raise DatabaseError('Database error. {details}'.format(details=database_error))
 
     def bulk_edit(self, query, parameter_sets):
         try:
             self.cursor.executemany(operation=query, seq_params=parameter_sets)
             self.database.commit()
-        except Exception as exception:
+        except mysql.connector.errors.Error as database_error:
             self.database.rollback()
-            raise DatabaseTransactionError(
-                'ERROR creating new records to the database. Rolled back changes. {details}'.format(details=exception))
+            raise DatabaseError('Database error. {details}'.format(details=database_error))
 
     __instance__ = None
 
@@ -63,5 +75,5 @@ class DatabaseRecords:
         return DatabaseRecords.__instance__
 
 
-class DatabaseTransactionError(Exception):
+class DatabaseError(Exception):
     pass

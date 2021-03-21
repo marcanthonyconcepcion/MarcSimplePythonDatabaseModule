@@ -22,7 +22,7 @@ class MyTestCase(unittest.TestCase):
                                  {'index': 4, 'name': 'grape', 'weight': Decimal('393.43'), 'price': Decimal('100.28')}]
         self.dut = DatabaseRecords.get()
         self.dut.bulk_edit('insert into `fruits` (`name`, `weight`, `price`) values (%(name)s, %(weight)s,%(price)s)',
-                           [{key: record[key] for key in record if key is not 'index'}
+                           [{key: record[key] for key in record if key != 'index'}
                             for record in self.expected_records])
 
     def tearDown(self):
@@ -35,7 +35,12 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(database_records.PASSWORD, self.expected_configuration['database']['password'])
 
     def test_connection(self):
-        self.assertEqual(1, next(self.dut.fetch('select %(number)s', {'number': 1}))[0])
+        self.dut.disconnect()
+        self.assertFalse(self.dut.test_connection())
+        with self.assertRaises(database_records.DatabaseError):
+            next(self.dut.fetch('select %(number)s', {'number': 1}))
+        self.dut.reconnect()
+        self.assertTrue(self.dut.test_connection())
 
     def test_retrieve(self):
         expected_records = [tuple(record.values()) for record in self.expected_records]
@@ -61,7 +66,7 @@ class MyTestCase(unittest.TestCase):
         new_record = {'index': 5, 'name': 'watermelon', 'weight': Decimal('555.55'), 'price': Decimal('70.00')}
         self.expected_records.append(new_record)
         self.dut.edit('insert into `fruits` (`name`, `weight`, `price`) values (%(name)s, %(weight)s,%(price)s)',
-                      {key: new_record[key] for key in new_record if key is not 'index'})
+                      {key: new_record[key] for key in new_record if key != 'index'})
         self.test_retrieve()
 
 
