@@ -27,3 +27,6 @@ This demo contains the following:
 - database_demo.yaml which is the configuration file that contains user credentials and server settings used to connect to the test MySQL server.
 
 This Python software demo on database access shall be compared with its corresponding PHP and Raku Perl software demos.
+
+For more inquiries, please feel free to e-mail me at marcanthonyconcepcion@gmail.com.
+Thank you.
