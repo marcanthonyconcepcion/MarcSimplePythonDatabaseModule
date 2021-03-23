@@ -69,6 +69,27 @@ class MyTestCase(unittest.TestCase):
                       {key: new_record[key] for key in new_record if key != 'index'})
         self.test_retrieve()
 
+    def test_edit_transaction(self):
+        expected_records = [
+            {'index': 1, 'name': 'Pingguo', 'weight': Decimal('200.03'), 'price': Decimal('40.05')},
+            {'index': 2, 'name': 'banana', 'weight': Decimal('400.03'), 'price': Decimal('60.50')},
+            {'index': 3, 'name': 'orange', 'weight': Decimal('193.57'), 'price': Decimal('45.75')},
+            {'index': 5, 'name': 'watermelon', 'weight': Decimal('777.77'), 'price': Decimal('88.88')}
+        ]
+        first_queries = [
+            {'statement': 'update `fruits` set `name`= %(name)s where `index`= %(index)s',
+                          'parameters': {'name': 'Pingguo', 'index': 1}},
+            {'statement': 'update `fruits` set `price`= %(price)s where `name`= %(name)s',
+                          'parameters': {'price': 60.50, 'name': 'banana'}},
+            {'statement': 'delete from `fruits` where `name`= %(name)s',
+                          'parameters': {'name': 'grape'}},
+            {'statement': 'insert into `fruits` (`name`, `weight`, `price`) values (%(name)s, %(weight)s, %(price)s)',
+                          'parameters': {'name': 'watermelon', 'weight': 777.77, 'price': 88.88}},
+        ]
+        self.dut.transact_edit(first_queries)
+        self.assertListEqual([tuple(expected_record.values()) for expected_record in expected_records],
+                             [record for record in self.dut.fetch('select * from `fruits`')])
+
 
 if __name__ == '__main__':
     unittest.main()

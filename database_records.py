@@ -66,6 +66,15 @@ class DatabaseRecords:
             self.database.rollback()
             raise DatabaseError('Database error. {details}'.format(details=database_error))
 
+    def transact_edit(self, queries):
+        try:
+            for query in queries:
+                self.cursor.execute(operation=query['statement'], params=query['parameters'])
+            self.database.commit()
+        except mysql.connector.errors.Error as database_error:
+            self.database.rollback()
+            raise DatabaseError('Database error. {details}'.format(details=database_error))
+
     __instance__ = None
 
     @staticmethod
